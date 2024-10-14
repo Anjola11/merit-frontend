@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Aggregator from "./Services/Aggregator";
+import arrowRight from "../assets/arrow-right.png"
 
 const Universities = () => {
   const [universities, setUniversities] = useState([]);
@@ -46,12 +47,22 @@ const Universities = () => {
       {error && <p className="text-red-500">{error}</p>}
       {!loading && universities.length > 0 && (
         <div>
-          <h2 className="text-xl font-bold">Universities offering {course}</h2>
-          <ul className="list-disc pl-5">
-            {universities.map((university, index) => (
-              <li key={index}>{university}</li> // Map through universities
-            ))}
-          </ul>
+          <h2 className="text-3xl">Universities offering <span className="font-bold">{course}</span></h2>
+          <table>
+            <thead>
+              <tr>
+                <th className="text-xl">Universities</th>
+              </tr>
+            </thead>
+            <tbody>
+              {universities.map((university, index) => (
+                <tr key={index}>
+                  <td>{university}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
         </div>
       )}
       {!loading && universities.length === 0 && (
@@ -68,7 +79,12 @@ const Universities = () => {
         <h2 className="mt-9 mb-3 font-semibold">
           USE OUR AGGREGATOR APP TO SEE YOUR CHANCES OF ADMISSION
         </h2>
-        <a href="/service/aggregate-calculator">click here</a>
+        <a href="/service/aggregate-calculator" >
+          <div className="bg-[#5c48ee] flex justify-center items-center gap-2 w-max py-2 px-4 rounded-full text-white">
+            <p>Check Now</p>
+            <div className=" bg-white rounded-full"><img src={arrowRight} width={25} height={25} alt="" /></div>
+          </div>
+        </a>
       </div>
     </div>
   );

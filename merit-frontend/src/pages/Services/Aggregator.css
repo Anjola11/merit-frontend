@@ -23,11 +23,6 @@ body {
   margin: 30px auto;
 }
 
-.university-course-input {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
 
 input {
   padding: 7px 13px;
@@ -52,16 +47,14 @@ select {
   border: 1px solid #bcc1caff;
 }
 
-.score-inputs {
+.utme-postutme-input{
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   margin-top: 20px;
 }
 
-.olevel-input {
-  grid-column: span 2;
-}
+
 .submit-btn button {
   width: 100px;
   padding: 10px;
@@ -116,7 +109,7 @@ tr:hover {
 }
 
 @media (max-width: 600px) {
-  .score-inputs {
+  .utme-postutme-input  {
     grid-template-columns: 1fr;
   }
 
@@ -131,14 +124,10 @@ tr:hover {
 }
 
 @media (max-width: 430px) {
-  .score-inputs {
+  .utme-postutme-input {
     display: grid;
     grid-template-columns: 1fr;
   }
-  .olevel-input {
-    grid-column: span 1;
-  }
-
   input,
   select {
     font-size: 12px;

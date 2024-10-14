@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MdArrowDropDown } from "react-icons/md";
 import { motion } from "framer-motion";
 
+
 const Navbar = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
 
@@ -15,7 +16,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <div className="text-xl font-bold">
-            <a href="/">Merit.com</a>{" "}
+            <a href="/">Merit.com</a>{''}
           </div>
 
           {/* Nav Links */}

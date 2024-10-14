@@ -1,30 +1,28 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Aggregator.css';
 
-const BASE_URL = 'http://127.0.0.1:5000';
-
 function Aggregator() {
-  const [universities, setUniversities] = useState([]); // List of universities
-  const [university, setUniversity] = useState(''); // Selected university
-  const [courses, setCourses] = useState([]); // List of courses based on selected university
-  const [selectedCourse, setSelectedCourse] = useState(''); // Selected course
-  const [utme_score, setUtme_score] = useState(); // UTME score
-  const [utmeError, setUtmeError] = useState(''); // State for UTME score error message
-  const [postUtme_score, setPostUtme_score] = useState(); // Post UTME score
-  const [postUtmeError, setPostUtmeError] = useState(''); // State for Post UTME score error message
-  const [maxPostUtmeScore, setMaxPostUtmeScore] = useState(100); // Maximum Post UTME score
-  const [olevel, setOlevel] = useState(''); // Olevel grades
-  const [data, setData] = useState(null); // Fetched data
-  const [loading, setLoading] = useState(false); // Loading state
-  const [error, setError] = useState(''); // Error state
-  const [olevel_required, setOlevel_required] = useState(false) // State for Olevel required
-  const [postUtme_required, setPostUtme_required] = useState(false) // State for Post Utme required
-  const [sitting_required, setSitting_required] = useState(false)
-  const [sitting, setSitting] = useState('')
-  const [missingInfo, setMissingInfo] = useState([])
-  const [missingInfoError, setMissingInfoError] = useState("")
-  const [isButtonClicked, setisButtonClicked] = useState(false)
- 
+    const [universities, setUniversities] = useState([]); // List of universities
+    const [university, setUniversity] = useState(''); // Selected university
+    const [courses, setCourses] = useState([]); // List of courses based on selected university
+    const [selectedCourse, setSelectedCourse] = useState(''); // Selected course
+    const [utme_score, setUtme_score] = useState(); // UTME score
+    const [utmeError, setUtmeError] = useState(''); // State for UTME score error message
+    const [postUtme_score, setPostUtme_score] = useState(); // Post UTME score
+    const [postUtmeError, setPostUtmeError] = useState(''); // State for Post UTME score error message
+    const [maxPostUtmeScore, setMaxPostUtmeScore] = useState(100); // Maximum Post UTME score
+    const [olevel, setOlevel] = useState(''); // Olevel grades
+    const [data, setData] = useState(null); // Fetched data
+    const [loading, setLoading] = useState(false); // Loading state
+    const [error, setError] = useState(''); // Error state
+    const [olevel_required, setOlevel_required] = useState(false) // State for Olevel required
+    const [postUtme_required, setPostUtme_required] = useState(false) // State for Post Utme required
+    const [sitting_required, setSitting_required] = useState(false)
+    const [sitting, setSitting] = useState('')
+    const [missingInfo, setMissingInfo] = useState([]);
+    const [missingInfoError, setMissingInfoError] = useState("");
+    const [isButtonClicked, setIsButtonClicked] = useState(false);
+
   // Fetch the university list when the component mounts
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -54,7 +52,6 @@ function Aggregator() {
     setData('')
     setOlevel_required(false);
     setPostUtme_required(false);
-    setSitting_required(false)
     setSitting('')
     setUtme_score('')
     setPostUtme_score('')
@@ -136,27 +133,27 @@ function Aggregator() {
 
   // Update UTME score
   const updateUtme_score = (event) => {
-    setMissingInfoError('')
     const value = event.target.value;
 
     // Allow empty input for clearing the field
     if (value === '') {
-      setUtme_score(''); // Set to empty string to clear
-      setUtmeError(''); // Clear error message when input is empty
+      setUtme_score('');
+      setUtmeError('');
+      setMissingInfo((prev) => prev.filter((item) => item !== 'UTME'));
       return;
     }
 
-    // Convert value to a number
     const numberValue = Number(value);
-
-    // Update state only if the value is valid
     if (numberValue >= 0 && numberValue <= 400) {
       setUtme_score(numberValue);
-      setUtmeError(''); // Clear error message if valid
+      setUtmeError('');
+      setMissingInfo((prev) => prev.filter((item) => item !== 'UTME')); // Remove UTME from missing info
     } else {
-      setUtmeError('Score should be <= 400'); // Set error message if invalid
+      setUtmeError('Score should be <= 400');
+      if (!missingInfo.includes('UTME')) setMissingInfo((prev) => [...prev, 'UTME']);
     }
-  };
+};
+
 
   // Handle blur event to validate the score
   const handleBlur = () => {
@@ -168,27 +165,26 @@ function Aggregator() {
 
   // Update Post UTME score
   const updatePostUtme_score = (event) => {
-    setMissingInfoError('')
     const value = event.target.value;
 
-    // Allow empty input for clearing the field
     if (value === '') {
       setPostUtme_score('');
-      setPostUtmeError(''); // Clear error message when input is empty
+      setPostUtmeError('');
+      setMissingInfo((prev) => prev.filter((item) => item !== 'Post-UTME'));
       return;
     }
 
-    // Convert value to a number
     const numberValue = Number(value);
-
-    // Update state only if the value is valid
     if (numberValue >= 0 && numberValue <= maxPostUtmeScore) {
       setPostUtme_score(numberValue);
-      setPostUtmeError(''); // Clear error message if valid
+      setPostUtmeError('');
+      setMissingInfo((prev) => prev.filter((item) => item !== 'Post-UTME')); // Remove Post-UTME from missing info
     } else {
-      setPostUtmeError(`Score should be <= ${maxPostUtmeScore}`); // Set error message if invalid
+      setPostUtmeError(`Score should be <= ${maxPostUtmeScore}`);
+      if (!missingInfo.includes('Post-UTME')) setMissingInfo((prev) => [...prev, 'Post-UTME']);
     }
-  };
+};
+
 
   // Handle blur event to validate the score
   const handlePostUtmeBlur = () => {
@@ -206,13 +202,13 @@ function Aggregator() {
       subject1: '',
       subject2: '',
       subject3: '',
+      subject4: '',
     },
   });
 
   const grades = ['A1', 'B2', 'B3', 'C4', 'C5', 'C6', 'D7', 'F9'];
 
   const handleChange = (event) => {
-    setMissingInfoError('')
     const { name, value } = event.target;
     setFormData((prevData) => ({
       ...prevData,
@@ -221,89 +217,96 @@ function Aggregator() {
         [name]: value,
       },
     }));
-    
-  };
+
+    // Check if Olevel info is now complete
+    if (!olevelIncomplete({ ...formData.olevelResults, [name]: value })) {
+      setMissingInfo((prev) => prev.filter((item) => item !== 'O-level result'));
+    }
+};
+
   const updateSitting = (event) => {
-    setMissingInfoError('')
     const value = event.target.value;
     const sittingValue = Number(value);
     setSitting(sittingValue);
     
   };
+  
 
   const olevelIncomplete = (obj) => Object.values(obj).some(value => value === '');
+
   useEffect(() => {
     const validateForm = () => {
-      const newMissingInfo = []
+      const newMissingInfo = [];
       if (!utme_score) newMissingInfo.push('UTME');
       if (postUtme_required && !postUtme_score) newMissingInfo.push('Post-UTME');
       if (olevel_required && olevelIncomplete(formData.olevelResults)) newMissingInfo.push('O-level result');
       if (sitting_required && !sitting) newMissingInfo.push('O-level sittings');
-  
+
       setMissingInfo(newMissingInfo);
       
-    };
-  
-    validateForm();
-  }, [utme_score, postUtme_score, formData.olevelResults, postUtme_required, olevel_required, sitting_required, sitting]);
-  
-  
-  
-  
-  
-  const handleSubmit = async () => {
-    setisButtonClicked(true)
-    setLoading(true);
-    setError(''); // Reset error before fetch
-    if(missingInfo.length ===0){
-      
-      try {
-        // Construct query parameters for the recommendation
-        const queryParams = new URLSearchParams({
-          course_name: selectedCourse || courses[0], // Use the selected course or the first course if none is selected
-          utme_score: utme_score,
-          post_utme_score: postUtme_score,
-          no_of_sitting: sitting,
-          grades: [
-            formData.olevelResults.mathematics,
-            formData.olevelResults.english,
-            formData.olevelResults.subject1,
-            formData.olevelResults.subject2,
-            formData.olevelResults.subject3,
-          ],
-          university_name: university, // Use the selected university
-          
-        }).toString();
-        formData.olevelResults.subject1;
-  
-        const response = await fetch(
-          `${BASE_URL}/evaluations/recommendations?${queryParams}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-  
-        if (!response.ok) {
-          throw new Error('Failed to fetch data');
-        }
-  
-        const result = await response.json();
-        setData(result); // Store the fetched data in state
-      } catch (error) {
-        console.log(error)
-        setError('Something went wrong, please try again.'); // Set error message on failure
-      } finally {
-        setLoading(false); // Stop loading when the fetch is complete
+      // Update error message only if the button has been clicked
+      if (isButtonClicked) {
+        setMissingInfoError(newMissingInfo.length > 0 ? `${newMissingInfo.join(', ')} ${newMissingInfo.length > 1 ? 'are' : 'is'} missing` : '');
       }
-    }else {
-      setMissingInfoError(missingInfo.join(', '));
-      return;
+    };
+
+    validateForm();
+  }, [utme_score, postUtme_score, formData.olevelResults, postUtme_required, olevel_required, sitting_required, sitting, isButtonClicked]);
+
+  const handleSubmit = async () => {
+    setIsButtonClicked(true);
+    setLoading(true);
+    setError('');
+
+    if (missingInfo.length === 0) {
+        try {
+            // Construct query parameters for the recommendation
+            const queryParams = new URLSearchParams({
+              course_name: selectedCourse || courses[0], // Use the selected course or the first course if none is selected
+              utme_score: utme_score,
+              post_utme_score: postUtme_score,
+              no_of_sitting: sitting,
+              grades: [
+                formData.olevelResults.mathematics,
+                formData.olevelResults.english,
+                formData.olevelResults.subject1,
+                formData.olevelResults.subject2,
+                formData.olevelResults.subject3,
+              ],
+              university_name: university, // Use the selected university
+              
+            }).toString();
+            formData.olevelResults.subject1;
+      
+            const response = await fetch(
+              `${BASE_URL}/evaluations/recommendations?${queryParams}`,
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+      
+            if (!response.ok) {
+              throw new Error('Failed to fetch data');
+            }
+      
+            const result = await response.json();
+            setData(result); // Store the fetched data in state
+          } catch (error) {
+            console.log(error)
+            setError('Something went wrong, please try again.'); // Set error message on failure
+          } finally {
+            setLoading(false); // Stop loading when the fetch is complete
+          }
+    } else {
+      setMissingInfoError(`${missingInfo.join(', ')} ${missingInfo.length > 1 ? 'are' : 'is'} missing`);
     }
-    
+    setLoading(false);
   };
+
+  // ... (keep other existing JSX)
 
   return (
     <>
@@ -317,9 +320,9 @@ function Aggregator() {
           get started.
         </p>
       </div>
-
+      
       <div className='form-wrap'>
-          <div className='university-select'>
+      <div className='university-select'>
             <select onChange={updateUniversity} value={university} className='px-2'>
               <option value=''>Select University</option>
               {universities.length > 0 ? (
@@ -493,75 +496,17 @@ function Aggregator() {
                 </label>
             }
           </div>
-          {isButtonClicked && missingInfoError !== '' && <p className='text-red-700'>{missingInfoError} is missing</p>}
-          <div className="submit-btn" >
-            <button className="submit" onClick={handleSubmit}>
-              Evaluate
-            </button>
-          </div>
-        </div>}
         
+        {missingInfoError && <p className='text-red-700'>{missingInfoError}</p>}
+        
+        <div className="submit-btn" onClick={handleSubmit}>
+          <button className="submit">
+            Evaluate
+          </button>
+        </div>
       </div>
 
-      <div className="evaluation">
-        {!missingInfo && loading && <p>Loading...</p>}
-        {error && <p>{error}</p>}
-        {data && !loading && !error && (
-          <div>
-            <h2>Evaluation Results</h2>
-            <div className="scroll-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Course</th>
-                    <th>Course Aggregate</th>
-                    <th>Student's Aggregate</th>
-                    <th>Faculty</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{data.course}</td>
-                    <td>{data['course aggregate']}</td>
-                    <td>{data["student's aggregate"]}</td>
-                    <td>{data.faculty}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            {/* Conditionally render other recommended courses */}
-            {Object.keys(data['other courses qualified for']).length > 0 ? (
-              <div>
-                <h3>Other Courses Qualified For:</h3>
-                <div className='scroll-container'>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Course</th>
-                        <th>Aggregate</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.keys(data['other courses qualified for']).map(
-                        (course) => (
-                          <tr key={course}>
-                            <td>{course}</td>
-                            <td>
-                              {data['other courses qualified for'][course]}
-                            </td>
-                          </tr>
-                        )
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              <p>No other courses in the faculty qualified for</p>
-            )}
-          </div>
-        )}
-      </div>
+      {/* ... (keep existing evaluation display logic) */}
     </>
   );
 }
