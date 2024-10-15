@@ -187,7 +187,7 @@ body {
 .chat-container {
     width: 100%; /* Make the chatbot cover the full width */
     height: calc(100vh - 120px); /* Adjust height to account for the space occupied by the header and footer */
-    background-color: #6b2dcc; /* Background color of the chat container */
+    background-color: #5A2D98; /* Background color of the chat container */
     border-radius: 0px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
     padding: 20px;
@@ -223,8 +223,9 @@ body {
 
 /* User message styling */
 .message.user {
-    background-color: white; /* User messages will have a white background */
-    color: black; /* Text color for user messages */
+    background-color: #E0B9E8; /* Light Pinkish Purple */
+    color: #4B1C8B; /* Dark Purple text */
+
     margin-left: auto;
     text-align: right;
     border-radius: 20px 20px 0 20px; /* Round top-right and bottom-right corners */
@@ -232,8 +233,8 @@ body {
 
 /* Bot message styling */
 .message.bot {
-    background-color: white; /* Bot messages will also have a white background */
-    color: black; /* Text color for bot messages */
+    background-color: #C0D9F7; /* Soft Blue */
+    color: #4B1C8B; /* Dark Purple text */
     border-radius: 20px 20px 20px 0; /* Round top-left and bottom-left corners */
 }
 
@@ -428,4 +429,13 @@ em {
     color: white;
     background-color: #1a202c;
     border-radius: 0.375rem;
+}
+
+#user-input {
+    height: 25px; /* Set a smaller height, similar to ChatGPT's input area */
+    font-size: 14px; /* Adjust the font size to match the smaller textarea */
+    padding: 8px; /* Optional: Adjust padding to give a bit of space around the text */
+    resize: none; /* Disable resizing */
+    border: 1px solid #ddd; /* Optional: Add a border for a cleaner look */
+    border-radius: 18px; /* Optional: Make the borders rounded */
 }

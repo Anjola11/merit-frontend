@@ -67,12 +67,6 @@ function autoScroll() {
 // Listen for scroll events to detect when the user scrolls up or down
 chatBox.addEventListener('scroll', checkScrollPosition);
 
-// Adjust height of textarea based on content
-function autoResizeTextarea() {
-    this.style.height = 'auto'; // Reset height
-    this.style.height = `${Math.min(this.scrollHeight, 120)}px`; // Set new height with max limit
-}
-
 // Modified typeMessage function to respect user's scroll
 function typeMessage(messageDiv, message) {
     const formattedMessage = formatMessage(message); // Format the message
@@ -123,7 +117,8 @@ function appendMessage(sender, message) {
     chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the bottom
 
     if (sender === 'bot') {
-        typeMessage(messageDiv, formatMessage(message)); // Use typing effect for bot
+        const cleanedMessage = message.trim();
+        typeMessage(messageDiv, formatMessage(cleanedMessage)); // Use typing effect for bot
     } else {
         messageDiv.innerHTML = formatMessage(message); // Display user message directly
     }
@@ -135,7 +130,7 @@ async function sendMessage() {
 
     appendMessage("user", message); // Append user message to chat
     userInput.value = ""; // Clear input box immediately
-    autoResizeTextarea.call(userInput); // Reset the height of textarea
+    resetTextareaHeight(); // Reset the height of textarea
 
     const response = await fetch("/chat", {
         method: "POST",
@@ -150,15 +145,47 @@ async function sendMessage() {
 }
 
 
+// Attach event listeners
 sendButton.addEventListener("click", sendMessage);
 
-userInput.addEventListener("input", autoResizeTextarea); // Adjust height on input
+// Adjust height on input (remove resizing on normal typing)
+userInput.addEventListener("input", (event) => {
+    // Do nothing on normal typing
+});
+
+// Handle Shift + Enter and regular Enter behavior
 userInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-        if (!event.shiftKey) {
-            event.preventDefault(); // Prevent default behavior of adding new line
-            sendMessage(); // Send the message when Enter is pressed
-        }
-        // If Shift + Enter is pressed, allow new line
+    if (event.key === "Enter" && event.shiftKey) {
+        event.preventDefault(); // Prevent default behavior of adding a newline
+        addNewLine(); // Add a new line and expand the textarea
+    } else if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault(); // Prevent default behavior of adding a newline
+        sendMessage(); // Send the message when Enter is pressed without Shift
+        resetTextareaHeight(); // Reset textarea height after sending a message
     }
 });
+
+// Function to add a new line and expand the textarea when Shift + Enter is pressed
+function addNewLine() {
+    const currentValue = userInput.value;
+    const cursorPos = userInput.selectionStart; // Get the current cursor position
+
+    // Insert a new line at the current cursor position
+    userInput.value = currentValue.slice(0, cursorPos) + "\n" + currentValue.slice(cursorPos);
+    userInput.selectionStart = userInput.selectionEnd = cursorPos + 1; // Move the cursor to the new line
+
+    // Adjust the textarea height manually after inserting the new line
+    autoResizeTextarea(); // Now we handle the auto-resizing only after Shift + Enter
+}
+
+// Function to manually resize the textarea based on its scrollHeight
+function autoResizeTextarea() {
+    userInput.style.height = 'auto'; // Reset height before recalculating
+    userInput.style.height = `${Math.min(userInput.scrollHeight, 120)}px`; // Max height limit (120px or whatever you want)
+}
+
+// Reset textarea height to initial height (1 row) after sending a message
+function resetTextareaHeight() {
+    userInput.style.height = 'auto'; // Reset to auto before calculating
+    userInput.style.height = '28px'; // Reset to initial height (adjust this as needed)
+}

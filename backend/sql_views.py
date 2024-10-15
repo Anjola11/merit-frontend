@@ -577,6 +577,11 @@ def chat():
 
     return jsonify({"response": model_response})
 
+    @app.route("/clear-chat", methods=["POST"])
+    def clear_chat():
+        global history
+        history = []  # Clear the stored chat history
+        return jsonify({"status": "success"})
 
 if __name__ == '__main__':
     app.run(debug=True)
