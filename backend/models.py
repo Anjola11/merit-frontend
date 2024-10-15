@@ -1,8 +1,10 @@
 from os import getenv
 
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, ForeignKey, Float
+from sqlalchemy import (
+    create_engine, Column, Integer, String, Boolean, ForeignKey, Float)
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import sessionmaker, declarative_base, relationship, scoped_session
+from sqlalchemy.orm import (
+    sessionmaker, declarative_base, relationship, scoped_session)
 
 
 USERNAME = getenv('DB_USERNAME')
@@ -29,7 +31,6 @@ class Universities(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
     year = Column(String(50), nullable=False)
-    olevel_for_aggr = Column(Boolean, nullable=True)
     total_post_utme = Column(Integer, nullable=True)
     post_utme_passmark = Column(Integer, nullable=True)
     olevel_subjects = Column(Integer, nullable=True)
@@ -38,6 +39,8 @@ class Universities(Base):
     utme_postutme = Column(Boolean, default=False, nullable=True)
     utme_postutme_olevel = Column(Boolean, default=False, nullable=True)
     utme_olevel = Column(Boolean, default=False, nullable=True)
+    sitting = Column(Boolean, default=False)
+    aggr_method = Column(String(255), nullable=True)
 
     about_uni = relationship(
         "About", back_populates="universities", cascade="all, delete-orphan")
@@ -152,12 +155,12 @@ class FuoyeCourses(BaseUniCourses):
 
 # session = Session()
 
-try:
-    # Your query/operation here
-    session.commit()  # Commit the transaction if successful
-except Exception as e:
-    # Rollback the transaction if there is any error
-    session.rollback()
-    print(f"Error: {e}")
-finally:
-    session.close()  # Always close the session when done
+# try:
+#     # Your query/operation here
+#     session.commit()  # Commit the transaction if successful
+# except Exception as e:
+#     # Rollback the transaction if there is any error
+#     session.rollback()
+#     print(f"Error: {e}")
+# finally:
+#     session.close()  # Always close the session when done

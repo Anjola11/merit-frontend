@@ -98,7 +98,7 @@ def insert_uni_courses(session, uni_name, uni_class, courses_dict):
                 name=course_name,
                 faculty=course_data['faculty'],
                 aggregate=course_data['aggregate'],
-                university_id=university.id  # Set university_id for each course
+                university_id=university.id
             )
 
             session.add(course)
@@ -108,7 +108,8 @@ def insert_uni_courses(session, uni_name, uni_class, courses_dict):
     except IntegrityError as e:
         session.rollback()
         print(
-            f"Failed to insert courses for {uni_name} due to IntegrityError: {e.orig}")
+            f"Failed to insert courses
+            for {uni_name} due to IntegrityError: {e.orig}")
     except Exception as e:
         session.rollback()
         print(f"An error occurred while inserting courses for {uni_name}: {e}")
@@ -121,8 +122,10 @@ uni_details_dict = {
     "University of Nigeria, Nsukka (UNN)": (UnnCourses, unn_courses_),
     "Obafemi Awolowo University (OAU)": (OauCourses, oau_courses_),
     "Ahmadu Bello University (ABU)": (AbuCourses, abu_courses_),
-    "University of Ilorin (UNILORIN)": (UnilorinCourses, unilorin_courses_),
-    "Federal University of Technology, Akure (FUTA)": (FutaCourses, futa_courses_),
+    "University of Ilorin (UNILORIN)":
+    (UnilorinCourses, unilorin_courses_),
+    "Federal University of Technology, Akure (FUTA)":
+    (FutaCourses, futa_courses_),
     "Nnamdi Azikiwe University (UNIZIK)": (UnizikCourses, unizik_courses_),
     "University of Benin (UNIBEN)": (UnibenCourses, uniben_courses_),
     "Federal University Oye Ekiti (FUOYE)": (FuoyeCourses, fuoye_courses_),

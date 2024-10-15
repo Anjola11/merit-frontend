@@ -22,26 +22,19 @@ class Unn(University):
     }
 
     @classmethod
-    def print_grades_info(cls):
-        print(
-            "In order to be considered for admission "
-            "into {} you must have at least 5 credits  "
-            "in 5 relevant subjects.\n".format(cls.uni_name)
-        )
-
-    @classmethod
-    def calculate_olevel(cls, grades=[]):
+    def calculate_olevel(cls, grades=[], sitting=None):
         grade_list = grades.split(',')
         grade_list.pop()
         total = 0
         for grade in grade_list:
             total += cls.unn_olevel[grade]["value"]
-        total = total + 40 # we added the 40 for Single sitting in UNN, this could be improved later
+        if sitting and sitting == 1:
+            total = total + 40 # we added the 40 for Single sitting in UNN, this could be improved later
         return round(total, 3)
 
     @classmethod
-    def calculate_aggregate(cls, utme, grades):
-        postutme = Unn.calculate_olevel(grades)
+    def calculate_aggregate(cls, utme, grades, sitting):
+        postutme = Unn.calculate_olevel(grades, sitting)
         aggregate = (0.9 * utme) + (0.1 * postutme)
         return round(aggregate, 4)
 

@@ -106,7 +106,7 @@ Calculates and evaluates a student's eligibility for a specific course at a sele
 - `utme_score` (int, required): The student's UTME score.
 - `post_utme_score` (int, required if applicable): The student's post-UTME score.
 - `grades` (str, required if applicable): Comma-separated O-level grades (if required by the university).
-- `sitting` (int, required if applicable): an integer greater than 0
+- `no_of_sitting` (int, required if applicable): an integer greater than 0
 
 **Response Examples:**
 - `200 OK`:
@@ -140,7 +140,7 @@ Determines the required post-UTME score for a specific course at a selected univ
 - `course_name` (str, required): The name of the course to evaluate.
 - `utme_score` (int, required): The student's UTME score.
 - `grades` (str, required if applicable): Comma-separated O-level grades (if required by the university).
-- `sitting` (int, required if applicable): an integer greater than 0
+- `no_of_sitting` (int, required if applicable): an integer greater than 0
 
 **Response Examples:**
 - `200 OK`:

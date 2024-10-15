@@ -19,7 +19,7 @@ uni_dict = {uni['name']: uni['id'] for uni in universities}
 def check_uni(uni_id):
     supported_uni = [1, 2, 3, 4, 7, 8, 9]
     uni_id = int(uni_id)
-    if not uni_id in supported_uni:
+    if uni_id not in supported_uni:
         return False
 
 
@@ -27,7 +27,8 @@ def check_uni(uni_id):
 not_support_post_utme = [3]
 
 
-# group universities with their id according to their style of aggregate calculation
+# group universities with their id according -
+# - to their style of aggregate calculation
 utme_postutme = [1, 7, 8, 9]
 utme_postutme_olevel = [2, 4]
 utme_olevel = [3]
@@ -59,7 +60,9 @@ def create_class_instance(uni_id):
     return _class_instance
 
 
-def get_university_instance(uni_dict, course=None, utme_score=None, post_utme_score=None, o_level=None, courses=None, sitting=None):
+def get_university_instance(uni_dict, course=None, utme_score=None,
+                            post_utme_score=None, o_level=None,
+                            courses=None, sitting=None):
     """Fetch university instance based on the provided university name."""
     course_ = None
     utme_score_ = None
@@ -78,7 +81,7 @@ def get_university_instance(uni_dict, course=None, utme_score=None, post_utme_sc
     if uni_id is None:  # Check if the university ID is found
         return jsonify({"error": "university not found"}), 404
 
-    if check_uni(uni_id) == False:
+    if check_uni(uni_id) is False:
         return jsonify({"error": "university currently not supported"}), 404
 
     # Create class instance
@@ -99,34 +102,37 @@ def get_university_instance(uni_dict, course=None, utme_score=None, post_utme_sc
         if uni_id not in not_support_post_utme:
             post_utme_score_ = request.args.get('post_utme_score')
             if not post_utme_score_:
-                return jsonify({"error": "post_utme_score parameter is required"}), 400
+                return jsonify(
+                    {"error": "post_utme_score parameter is required"}), 400
 
         if post_utme_score_:
             post_utme_score_ = int(post_utme_score_)
             max_post_utme = universities[index].get("total post utme")
             if post_utme_score_ > max_post_utme:
-                return jsonify({"error": f"Max post utme score is {max_post_utme}"}), 400
+                return jsonify({"error": f"Max score is {max_post_utme}"}), 400
     if o_level:
         if uni_id in utme_postutme_olevel or uni_id in utme_olevel:
             o_level_ = request.args.get('grades')
             if o_level_:
                 o_level_grades = o_level_.split(',')
-                if grades_needed[uni_id] == 4:  # tempoary
-                    o_level_grades.pop()
                 no_of_grades = grades_needed[uni_id]
                 if len(o_level_grades) != no_of_grades:
-                    return jsonify({"error": f"Please enter exactly {no_of_grades} grades."}), 400
+                    return jsonify(
+                        {"error": f"Enter {no_of_grades} grades."}), 400
             else:
                 return jsonify({"error": "grades parameter is required"}), 400
     if sitting:
         if uni_id in sittings:
             sitting_ = request.args.get('no_of_sitting')
             if not sitting_:
-                return jsonify({"error": "no_of_sitting parameter is required"}), 400
+                return jsonify(
+                    {"error": "no_of_sitting parameter is required"}), 400
             if not sitting_.isdecimal():
-                return jsonify({"error": "no_of_sitting must be a number greater than 0"}), 400
+                return jsonify(
+                    {"error": "no_of_sitting must be an integer"}), 400
             if sitting_.isdecimal() and int(sitting_) <= 0:
-                return jsonify({"error": "no_of_sitting must be a number greater than 0"}), 400
+                return jsonify(
+                    {"error": "no_of_sitting must be greater than 0"}), 400
 
             sitting_ = int(sitting_)
 
@@ -134,7 +140,8 @@ def get_university_instance(uni_dict, course=None, utme_score=None, post_utme_sc
         courses_ = list(_class_instance.get_courses().keys())
         if course_ not in courses_:
             return jsonify({
-                "message": f"The course '{course_}' is not offered at {selected_university}. Please select another course."
+                "message": f"The course '{course_}' is not offered at"
+                f"{selected_university}. Please select another course."
             }), 404
 
     return {

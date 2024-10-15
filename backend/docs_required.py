@@ -1,4 +1,5 @@
-# group universities with their id according to their style of aggregate calculation
+# group universities with their id according -
+# - to their style of aggregate calculation
 
 utme_postutme = [1, 7, 8, 9]
 utme_postutme_olevel = [2, 4]
@@ -16,7 +17,9 @@ grades_needed = {
 
 
 def get_aggr_docs(uni_id):
-    """Use the id of the university to get the required docs for aggr calculation"""
+    """Use the id of the university to get the required docs for aggr
+    calculation
+    """
 
     sitting = False
     if uni_id in sittings:

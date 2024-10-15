@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for, Response
+from flask import Flask, render_template, request, jsonify, Response
 from universities import universities
 from flask_cors import CORS
 from chat_model import history, model
@@ -10,9 +10,6 @@ from helper import (
     sittings,
     utme_postutme,
     utme_postutme_olevel,
-    grades_needed,
-    create_class_instance,
-    check_uni,
     get_university_instance
 )
 
@@ -40,7 +37,7 @@ def get_universities_offering_course():
               code with an error message.
             - If no universities offer the specified course, returns a 404
               status code with a message.
-            - Otherwise, returns a 200 status code with a JSON object containing
+            - Otherwise, returns a JSON object containing
               the course name and a list of universities offering the course.
     """
     course = request.args.get('course_name')
@@ -66,29 +63,34 @@ def get_universities_offering_course():
 @app.route('/evaluations/recommendations', methods=['POST', 'GET'])
 def calculate_evaluate_recommend():
     """
-    Calculates and evaluates a student's eligibility for a specific course at a selected university.
+    Calculates and evaluates a student's eligibility for a specific course at
+    a selected university.
 
-    This endpoint accepts both POST and GET requests with query parameters to calculate the student's
-    aggregate score and determine their eligibility for a specific course. It also recommends other
-    courses within the same faculty for which the student is qualified.
+    This endpoint accepts both POST and GET requests with query parameters to
+    calculate the student's aggregate score and determine their eligibility for
+    a specific course. It also recommends other courses within the same faculty
+    for which the student is qualified.
 
     Query Parameters:
         course_name (str): The name of the course to evaluate.
         utme_score (int): The student's UTME score.
         post_utme_score (int): The student's post-UTME score.
-        grades (str): Comma-separated O-level grades (if required by the university).
+        grades (str): Comma-separated O-level grades (if required).
 
     Returns:
         JSON response:
-            - If any required parameter is missing, returns a 400 status code with an error message.
-            - If the specified course is not offered at the selected university, returns a 404 status
-              code with a message.
-            - Otherwise, returns a 200 status code with a JSON object containing the evaluation results,
-              including the course name, course aggregate, student's aggregate, university name,
-              university ID, faculty, and other courses the student is qualified for.
+            - If any required parameter is missing, returns a 400 status code
+            with an error message.
+            - If the specified course is not offered at the
+            selected university, returns a 404 status code with a message.
+            - Otherwise, returns a JSON object containing
+            the evaluation results, such as the course name, course aggregate,
+            student's aggregate, university name, university ID, faculty, and
+            other courses the student is qualified for.
     """
     result = get_university_instance(
-        uni_dict, course=True, utme_score=True, post_utme_score=True, o_level=True, courses=True, sitting=True)
+        uni_dict, course=True, utme_score=True, post_utme_score=True,
+        o_level=True, courses=True, sitting=True)
 
     if isinstance(result, tuple) and isinstance(result[0], Response):
         return result
@@ -161,25 +163,29 @@ def calculate_evaluate_recommend():
 @app.route('/post-utme/requirements', methods=['GET'])
 def determine_required_post_utme_score():
     """
-    Determines the required post-UTME score for a specific course at a selected university.
+    Determines the required post-UTME score for a specific course at a selected
+    university.
 
-    This endpoint accepts a GET request with query parameters to calculate the required post-UTME
-    score for a student based on their UTME score and, if applicable, O-level grades.
+    This endpoint accepts a GET request with query parameters to calculate the
+    required post-UTME score for a student based on their pUTME score and, if
+    applicable, O-level grades.
 
     Query Parameters:
         course_name (str): The name of the course to evaluate.
         utme_score (int): The student's UTME score.
-        grades (str): Comma-separated O-level grades (if required by the university).
+        grades (str): Comma-separated O-level grades (if required).
 
     Returns:
         JSON response:
-            - If any required parameter is missing, returns a 400 status code with an error message.
-            - If the specified course is not offered at the selected university, returns a 404 status
-              code with a message.
-            - If the calculation is not supported at the selected university, returns a 404 status
-              code with a message.
-            - Otherwise, returns a 200 status code with a JSON object containing the required post-UTME
-              score, course name, post-UTME mark, pass mark, university name, and university ID.
+            - If any required parameter is missing, returns a 400 status code
+            with an error message.
+            - If the specified course is not offered at the selected
+            university, returns a 404 status code with a message.
+            - If the calculation is not supported at the selected university,
+            returns a 404 status code with a message.
+            - Otherwise, returns a with a JSON object containing
+            the required post-UTME score, course name, post-UTME mark,
+            pass mark, university name, and university ID.
     """
     result = get_university_instance(
         uni_dict, course=True, utme_score=True, o_level=True, courses=True)
@@ -201,7 +207,8 @@ def determine_required_post_utme_score():
 
     if uni_id in not_support_post_utme:
         return jsonify({
-            "message": f"This feature is currently unavailable for {result['selected_university']}."}), 404
+            "message": "This feature is currently unavailable"
+            f"for {result['selected_university']}."}), 404
 
     if uni_id in utme_postutme_olevel:
         required_score = _class_instance.calculate_required_post_utme_score(
@@ -215,39 +222,49 @@ def determine_required_post_utme_score():
 
     if required_score is None:
         return jsonify({
-            "message": f"Currently not supported at {result['selected_university']}."}), 404
+            "message": "Currently not supported"
+            f"at {result['selected_university']}."}), 404
 
     required_score = int(round(required_score))
+    postutme_passmark = _class_instance.get_aggregate_docs()[
+        "postutme_passmark"]
+    if required_score < postutme_passmark:
+        required_score = postutme_passmark
 
     result = {
         "course": course,
         "required score": required_score,
         "post utme mark": post_utme_mark,
-        "postutme_passmark": _class_instance.get_aggregate_docs()["postutme_passmark"],
+        "postutme_passmark": postutme_passmark,
         "univeristy name": result["selected_university"],
         "university id": uni_id
     }
-
     return jsonify(result)
 
 
 @app.route('/aggregates/requirements', methods=['GET'])
 def get_required_aggregate():
     """
-    Retrieves the required aggregate score for a specific course at a selected university.
+    Retrieves the required aggregate score for a specific course at a selected
+    university.
 
-    This endpoint accepts a GET request with a query parameter `course_name` to retrieve the
-    required aggregate score for the specified course at the selected university.
+    This endpoint accepts a GET request with a query parameter `course_name` to
+    retrieve the required aggregate score for the specified course at the
+    selected university.
 
     Query Parameters:
-        course_name (str): The name of the course to retrieve the aggregate score for.
+        course_name (str): The name of the course to retrieve the aggregate
+        score for.
 
     Returns:
         JSON response:
-            - If the `course_name` parameter is missing, returns a 400 status code with an error message.
-            - If the course or its aggregate score is not found, returns a 404 status code with an error message.
-            - Otherwise, returns a 200 status code with a JSON object containing the course name, university name,
-              university ID, and the required aggregate score for the course.
+            - If the `course_name` parameter is missing, returns a 400 status
+            code with an error message.
+            - If the course or its aggregate score is not found, returns a 404
+            status code with an error message.
+            - Otherwise, returns a  with a JSON object containing
+            the course name, university name, university ID, and the required
+            aggregate score for the course.
     """
     result = get_university_instance(uni_dict, course=True)
 
@@ -274,13 +291,14 @@ def about_university():
     """
     Retrieves detailed information about a selected university.
 
-    This endpoint accepts a GET request and returns detailed information about the selected university,
-    including its name, ID, location, establishment year, and description.
+    This endpoint accepts a GET request and returns detailed information
+    about the selected university, including its name, ID, location,
+    establishment year, and description.
 
     Returns:
         JSON response:
-            - A JSON object containing the university's name, ID, location, establishment year,
-              and description.
+            - A JSON object containing the university's name, ID, location,
+            establishment year, and description.
     """
     result = get_university_instance(uni_dict)
 
@@ -310,12 +328,13 @@ def display_list_of_courses():
     """
     Retrieves a list of courses offered by a selected university.
 
-    This endpoint accepts a GET request and returns a list of courses offered by the selected university,
-    along with the university's name and ID.
+    This endpoint accepts a GET request and returns a list of courses offered
+    by the selected university, along with the university's name and ID.
 
     Returns:
         JSON response:
-            - A JSON object containing the university's name, ID, and a list of courses offered by the university.
+            - A JSON object containing the university's name, ID, and a list
+            of courses offered by the university.
     """
     result = get_university_instance(uni_dict)
 
@@ -341,18 +360,22 @@ def get_faculty():
     """
     Retrieves the faculty of a specific course at a selected university.
 
-    This endpoint accepts a GET request with a query parameter `course_name` to retrieve the faculty
-    to which the specified course belongs at the selected university.
+    This endpoint accepts a GET request with a query parameter `course_name`
+    to retrieve the faculty to which the specified course belongs at the
+    selected university.
 
     Query Parameters:
         course_name (str): The name of the course to retrieve the faculty for.
 
     Returns:
         JSON response:
-            - If the `course_name` parameter is missing, returns a 400 status code with an error message.
-            - If the course or its faculty is not found, returns a 404 status code with an error message.
-            - Otherwise, returns a 200 status code with a JSON object containing the university name,
-              university ID, course name, and the faculty to which the course belongs.
+            - If the `course_name` parameter is missing, returns a 400 status
+            code with an error message.
+            - If the course or its faculty is not found, returns a 404 status
+            code with an error message.
+            - Otherwise, returns a 200 status code with a JSON object
+            containing the university name, university ID, course name, and
+            the faculty to which the course belongs.
     """
     # selected_university = "Obafemi Awolowo University (OAU)"
     result = get_university_instance(uni_dict, course=True)
@@ -379,15 +402,18 @@ def get_faculty():
 @app.route('/universities/faculties/courses', methods=['GET'])
 def display_faculties_and_courses():
     """
-    Retrieves a list of faculties and their respective courses offered by a selected university.
+    Retrieves a list of faculties and their respective courses offered by a
+    selected university.
 
-    This endpoint accepts a GET request and returns a list of faculties and the courses offered under
-    each faculty at the selected university, along with the university's name and ID.
+    This endpoint accepts a GET request and returns a list of faculties and
+    the courses offered under each faculty at the selected university, along
+    with the university's name and ID.
 
     Returns:
         JSON response:
-            - A JSON object containing the university's name, ID, and a dictionary where the keys are
-              faculty names and the values are lists of courses offered by each faculty.
+            - A JSON object containing the university's name, ID, and a
+            dictionary where the keys are faculty names and the values are
+            lists of courses offered by each faculty.
     """
     result = get_university_instance(uni_dict)
 
@@ -411,12 +437,14 @@ def list_universities():
     """
     Retrieves the list of supported universities.
 
-    This endpoint returns a list of universities currently supported by the application, filtered to 
-    include only those with available courses.
+    This endpoint returns a list of universities currently
+    supported by the application, filtered to include only those
+    with available courses.
 
     Returns:
         JSON response:
-            - A JSON object containing a list of university names that offer courses.
+            - A JSON object containing a list of university names
+            that offer courses.
     """
     uni_list = sorted([uni.get("name") for uni in universities if uni.get(
         "courses") and uni.get("name")])
@@ -433,15 +461,18 @@ def list_universities():
 @app.route("/all/universities/courses", methods=['GET'])
 def get_all_universities_and_courses():
     """
-    Returns a JSON object with all courses offered by all universities.
+    Returns a list of all courses along with the universities that offer them.
 
-    For each course offered by a university, it lists the university name and ID.
+    This endpoint accepts a GET request and returns a JSON response containing
+    each course and a list of universities (with names and IDs) that offer the
+    course.
 
     Returns:
         JSON response:
-            - If no courses are available, returns a 404 status code with a message.
-            - Otherwise, returns a 200 status code with a JSON object containing
-              all courses and the universities offering them.
+            - If no universities or courses are found, returns a 404 status
+              code with a message.
+            - Otherwise, returns a 200 status code with a JSON object
+              containing each course and the universities offering it.
     """
     courses_with_universities = {}
 
@@ -459,7 +490,8 @@ def get_all_universities_and_courses():
                 courses_with_universities[course_name].append(university_info)
 
     if not courses_with_universities:
-        return jsonify({"message": "No courses available across the universities."}), 404
+        return jsonify(
+            {"message": "No courses available across the universities."}), 404
 
     result = {
         "courses": courses_with_universities
@@ -473,7 +505,8 @@ def get_aggregate_requirements():
     """
     Retrieve aggregate requirements for universities.
 
-    This endpoint fetches and returns the aggregate requirements for a specific university.
+    This endpoint fetches and returns the aggregate requirements for
+    a specific university.
 
     Returns:
         Response: A JSON response containing the aggregate requirements.
@@ -502,12 +535,13 @@ def home():
     """
     Renders the AI chatbot interface.
 
-    This endpoint serves the HTML page where users can interact with the AI chatbot. 
-    It accepts a GET request to load the chatbot UI.
+    This endpoint serves the HTML page where users can interact with the AI
+    chatbot. It accepts a GET request to load the chatbot UI.
 
     Returns:
         HTML page:
-            - The chatbot interface allowing users to enter queries and receive responses.
+            - The chatbot interface allowing users to enter queries and
+            receive responses.
     """
     return render_template('chatbot.html')
 
@@ -517,16 +551,15 @@ def chat():
     """
     Handles user input and provides AI chatbot responses.
 
-    This endpoint accepts user messages through a POST request, interacts with an AI model, 
-    and returns the chatbot's response. The conversation history is stored for reference.
+    This endpoint accepts user messages through a POST request,
+    interacts with an AI model, and returns the chatbot's response.
+    THe conversation history is stored for reference.
 
-    Request:
-        JSON request body:
-            - "message" (str): The user input to be processed by the AI chatbot.
+    JSON request body:
+        - "message" (str): The user input to be processed by the AI chatbot.
 
-    Returns:
-        JSON response:
-            - A JSON object containing the AI model's response to the user's message.
+    JSON response:
+        - A JSON object containing the AI model's response.
     """
     user_input = request.json.get("message", "")
 

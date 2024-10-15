@@ -1,8 +1,4 @@
 """Defines a class University"""
-from models import Universities, About, session
-import sys
-from collections import defaultdict
-
 from models import (
     Universities,
     About,
@@ -17,6 +13,11 @@ from models import (
     UnibenCourses,
     FuoyeCourses
 )
+from models import Universities, About, session
+import sys
+from collections import defaultdict
+
+MAX_JAMB_SCORE = 400
 
 
 # Mapping of university IDs to course classes
@@ -73,7 +74,8 @@ class University:
                 return uni_index
 
     def get_courses(self):
-        """Fetches all the courses for the selected university from the database."""
+        """Fetches all the courses for a selected university from the database.
+        """
         uni_id = self.get_uni_index()
         course_class = university_courses_map.get(uni_id)
         courses = session.query(course_class).filter_by(
@@ -125,6 +127,41 @@ class University:
             return dict(faculty_courses)
         else:
             return None
+
+    def get_aggregate_docs(self):
+        """Gets the aggregate requirment for a specific university"""
+        uni = self.get_uni()
+        uni_id = uni.id
+        university_name = uni.name
+        aggr_year = uni.year
+        max_post_utme = uni.total_post_utme
+        require_olevel = uni.require_olevel
+        max_jamb_score = MAX_JAMB_SCORE
+
+        method = uni.aggr_method
+        olevel_subjects = uni.olevel_subjects
+        sitting = uni.sitting
+
+        postutme_passmark = None
+        # the passmark is usually have the total
+        if max_post_utme:
+            postutme_passmark = int(max_post_utme / 2)
+            # for OAU only
+            if uni_id == 4:
+                postutme_passmark = 25
+
+        return {
+            "aggr_year": aggr_year,
+            "max_post_utme": max_post_utme,
+            "postutme_passmark": postutme_passmark,
+            "require_olevel": require_olevel,
+            "max_jamb_score": max_jamb_score,
+            "method": method,
+            "olevel_subjects": olevel_subjects,
+            "sitting": sitting,
+            "university_name": university_name,
+            "university_id": uni_id
+        }
 
     def display_name(self):
         """Prints out the name of a selected university."""
